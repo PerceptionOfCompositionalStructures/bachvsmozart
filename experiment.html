@@ -5,11 +5,64 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
         <script src="jspsych/jspsych.js"></script>
         <script src="jspsych/plugins/jspsych-text.js"></script>
+        <script src="jspsych/plugins/jspsych-survey-text.js"></script>
         <script src="jspsych/plugins/jspsych-single-stim.js"></script>
+        <script src="jspsych/plugins/jspsych-single-audio.js" type="text/javascript"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.11/handlebars.min.js" type="text/javascript"></script>
         <link href="jspsych/css/jspsych.css" rel="stylesheet" type="text/css"></link>
     </head>
     <body>
     </body>
+    <script id="training-prompt-template" type="text/x-handlebars-template">
+      <div style="background-color: {{color}}" class="center-content">
+        <h1>Training phase: {{composer}}</h1>
+        <p>Listen to 10 chords by {{composer}}</p>
+        <div style="width:200px; height:30px; background-color:red; margin: auto">
+          <div style="width:{{progress}}%; height: 100%; background-color:blue"></div>
+        </div>
+        <p>{{index}} out of 10</p>
+        <img src="img/{{composer}}.jpg">
+      </div>
+    </script>
+
+    <script id="test-prompt-template" type="text/x-handlebars-template">
+      <div style="background-color: #2e4057" class="center-content">
+        <h1>Test phase</h1>
+        <div style="width:200px; height:30px; background-color:red; margin: auto">
+          <div style="width:{{progress}}%; height: 100%; background-color:blue"></div>
+        </div>
+        <p>{{index}} out of 40</p>
+        <p>Listen to this chord. Who do you think composed it?</p>
+        
+        <div class="left"><p>Mozart</p><img src="img/Mozart.jpg"></div>
+        <div class="right"><p>Haydn</p><img src="img/Haydn.jpg"></div>
+        <span style="clear: left; display: block; "></span>
+        <p>How confident are you of your answer?</p>
+        <table style="margin: auto; width: 400px">
+          <tr><td colspan="7">Not confident at allVery confident</td></tr>
+          <tr>
+            <td><input type="radio" name="confidence"></td>
+            <td><input type="radio" name="confidence"></td>
+            <td><input type="radio" name="confidence"></td>
+            <td><input type="radio" name="confidence"></td>
+            <td><input type="radio" name="confidence"></td>
+            <td><input type="radio" name="confidence"></td>
+            <td><input type="radio" name="confidence"></td>
+          </tr>
+          <tr>
+            <td>1</td>
+            <td>2</td>
+            <td>3</td>
+            <td>4</td>
+            <td>5</td>
+            <td>6</td>
+            <td>7</td>
+          </tr>
+        </table>
+        <button>Next</button>
+      </div>
+    </script>
+
     <script>
     var timeline = [];
     
@@ -21,15 +74,11 @@
 
     var instructions_block = {
       type: "text",
-      text: "<p>In this experiment, a circle will appear in the center " +
-          "of the screen.</p><p>If the circle is <strong>blue</strong>, " +
-          "press the letter F on the keyboard as fast as you can.</p>" +
-          "<p>If the circle is <strong>orange</strong>, do not press " +
-          "any key.</p>" +
-          "<div class='left center-content'><img src='img/blue.png'></img>" +
-          "<p class='small'><strong>Press the F key</strong></p></div>" +
-          "<div class='right center-content'><img src='img/orange.png'></img>" +
-          "<p class='small'><strong>Do not press a key</strong></p></div>" +
+      text:
+          "<p>In this experiment, you will hear final chords from Mozart and Haydn symphonies.</p>" +
+          "<p>First, you will go through a training phase where you will hear 10 chords by Mozart and then 10 chords by Haydn.</p>" +
+          "<p>Subsequently, you will hear 40 chords and will be asked to decide for each chord whether it was composed by Haydn or Mozart, based on the chord's orchestration style.</p>" +
+          "<p>Make sure to use <strong>headphones</strong> for this experiment so that you can hear the whole orchestral range.</p>" +
           "<p>Press any key to begin.</p>",
       timing_post_trial: 2000
     };
@@ -46,47 +95,104 @@
     //   choices: ['F']
     // }
     //timeline.push(blue_trial, orange_trial);
+    var training_stimuli = [];
+    for (i = 1; i <= 10; i++) {
+      training_stimuli.push({
+        stimulus: 'stimuli/haydn/h_s_'+i+'.mp3',
+        composer: 'Haydn',
+        index: i
+      });
+    }
+    for (i = 1; i <= 10; i++) {
+      training_stimuli.push({
+        stimulus: 'stimuli/mozart/m_s_'+i+'.mp3',
+        composer: 'Mozart',
+        index: i
+      });
+    }
     
-    var test_stimuli = [
-      {
-        stimulus: 'img/blue.png',
-        composer: 'haydn'
+    var trainingPromptTemplate = Handlebars.compile(document.getElementById("training-prompt-template").innerHTML);
+
+    var training_block = {
+      type: 'single-audio',
+      prompt: function() {
+        var trial = jsPsych.currentTrial();
+        return trainingPromptTemplate({
+          composer: trial.composer,
+          progress: trial.index * 10,
+          color: trial.composer == "Haydn" ? "#f18f01" : "#048ba8",
+          index: trial.index
+        });
       },
-      {
-        stimulus: 'img/orange.png',
-        composer: 'mozart'
-      }
-    ];
+      timeline: training_stimuli,
+      timing_response: 10000,
+      timing_post_trial: 0,
+      response_ends_trial: false
+    }
 
-    var all_trials = jsPsych.randomization.repeat(test_stimuli, 1);
-
+    
+    var test_stimuli = [];
+    for (i = 11; i <= 30; i++) {
+      test_stimuli.push({
+        stimulus: 'stimuli/haydn/h_s_'+i+'.mp3',
+        composer: 'Haydn',
+        index: i - 10
+      });
+    }
+    for (i = 11; i <= 30; i++) {
+      test_stimuli.push({
+        stimulus: 'stimuli/mozart/m_s_'+i+'.mp3',
+        composer: 'Mozart',
+        index: i + 10
+      });
+    }
+    
+    //var all_trials = jsPsych.randomization.repeat(test_stimuli, 1);
+    // TODO: randomize order?
+    var testPromptTemplate = Handlebars.compile(document.getElementById("test-prompt-template").innerHTML);
     var test_block = {
-      type: 'single-stim',
+      type: 'single-audio',
       choices: ['H', 'M'],
-      timeline: all_trials,
+      prompt: function() {
+        var trial = jsPsych.currentTrial();
+        return testPromptTemplate({
+          progress: trial.index / 40 * 100,
+          index: trial.index
+        });
+      },
+      timeline: test_stimuli,
       // timing_response: 1500,
       on_finish: function(data){
         var correct = false;
         console.log(data.composer, data.key_press);
-        if(data.composer == 'haydn' && data.key_press == 72) {
+        if(data.composer == 'Haydn' && data.key_press == 72) {
           correct = true;
-        } else if(data.composer == 'mozart' && data.key_press == 77) {
+        } else if(data.composer == 'Mozart' && data.key_press == 77) {
           correct = true;
         }
         jsPsych.data.addDataToLastTrial({correct: correct});
       }
     };
-    timeline.push(welcome_block);
-    timeline.push(instructions_block);
+    
+    var survey_trial = {
+      type: 'survey-text',
+      questions: ["How old are you?", "Where were you born?"],
+    };
+
+    // timeline.push(welcome_block);
+    // timeline.push(instructions_block);
+    // timeline.push(training_block);
     timeline.push(test_block);
+    timeline.push(survey_trial);
 
     jsPsych.init({
       timeline: timeline,
-      show_progress_bar: true,
       on_finish: function() {
         jsPsych.data.displayData();
       }
     });
 
     </script>
+    
+
 </html>
