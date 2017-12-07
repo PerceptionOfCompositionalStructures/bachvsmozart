@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
     <head>
-        <title>My experiment</title>
+        <title>Haydn vs Mozart</title>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
         <script src="jspsych/jspsych.js"></script>
         <script src="jspsych/plugins/jspsych-text.js"></script>
@@ -114,8 +114,8 @@
         <p class="progress-counter">{{index}} out of 40</p>
         <p>Listen to this chord. Who do you think composed it? Choose below.</p>
         
-        <div class="left" style="width: 50%"><div class="composer Mozart" onclick="selectComposer(this)"><p>Mozart</p><img src="img/Mozart.jpg" style="width: 150px; height:150px"></div></div>
-        <div class="right" style="width: 50%"><div class="composer Haydn" onclick="selectComposer(this)"><p>Haydn</p><img src="img/Haydn.jpg" style="width: 150px; height:150px"></div></div>
+        <div class="left" style="width: 50%"><div class="composer {{composer1}}" onclick="selectComposer(this)"><p>{{composer1}}</p><img src="img/{{composer1}}.jpg" style="width: 150px; height:150px"></div></div>
+        <div class="right" style="width: 50%"><div class="composer {{composer2}}" onclick="selectComposer(this)"><p>{{composer2}}</p><img src="img/{{composer2}}.jpg" style="width: 150px; height:150px"></div></div>
         <span style="clear: left; display: block; "></span>
         <p>How confident are you of your answer?</p>
         <table style="margin: auto; width: 100%">
@@ -260,21 +260,29 @@
       test_stimuli.push({
         stimulus: 'stimuli/haydn/h_s_'+i+'.mp3',
         composer: 'Haydn',
-        index: i - 10
       });
     }
     for (i = 11; i <= 30; i++) {
       test_stimuli.push({
         stimulus: 'stimuli/mozart/m_s_'+i+'.mp3',
         composer: 'Mozart',
-        index: i + 10
       });
     }
+    test_stimuli = jsPsych.randomization.shuffle(test_stimuli);
+    addIndices(test_stimuli);
     var finishedPlaying = false;
     var finishedPlayingTimeout;
     //var all_trials = jsPsych.randomization.repeat(test_stimuli, 1);
     // TODO: randomize order?
     var testPromptTemplate = Handlebars.compile(document.getElementById("test-prompt-template").innerHTML);
+    
+    if (Math.random() >= 0.5) {
+      var composer1 = 'Mozart';
+      var composer2 = 'Haydn';
+    } else {
+      var composer1 = 'Haydn';
+      var composer2 = 'Mozart';
+    }
     var test_block = {
       type: 'single-audio-with-confidence',
       //choices: ['H', 'M'],
@@ -287,9 +295,12 @@
         }, 8000);
         
         var trial = jsPsych.currentTrial();
+        console.log(trial.stimulus);
         return testPromptTemplate({
           progress: trial.index / 40 * 100,
-          index: trial.index
+          index: trial.index,
+          composer1: composer1,
+          composer2: composer2
         });
       },
       timeline: test_stimuli,
