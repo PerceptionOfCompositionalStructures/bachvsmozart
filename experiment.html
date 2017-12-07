@@ -185,7 +185,7 @@
     /* define welcome message block */
     var welcome_block = {
       type: "text",
-      text: "Welcome to the experiment. Press any key to begin."
+      text: "Welcome to the <strong>Haydn vs Mozart</strong> experiment. Press any key to begin."
     };
 
     var instructions_block = {
@@ -199,22 +199,31 @@
       timing_post_trial: 2000
     };
 
+    function addIndices(array) {
+      for (i = 0; i < array.length; i++) {
+        array[i].index = i + 1;
+      }
+    }
+    
     var mozartTrainingStimuli = [];
     for (i = 1; i <= 10; i++) {
       mozartTrainingStimuli.push({
         stimulus: 'stimuli/haydn/h_s_'+i+'.mp3',
         composer: 'Haydn',
-        index: i
       });
     }
+    mozartTrainingStimuli = jsPsych.randomization.shuffle(mozartTrainingStimuli);
+    addIndices(mozartTrainingStimuli);
     var haydnTrainingStimuli = [];
     for (i = 1; i <= 10; i++) {
       haydnTrainingStimuli.push({
         stimulus: 'stimuli/mozart/m_s_'+i+'.mp3',
         composer: 'Mozart',
-        index: i
       });
-    }
+    }    
+    haydnTrainingStimuli = jsPsych.randomization.shuffle(haydnTrainingStimuli);
+    addIndices(haydnTrainingStimuli);
+    
     if (Math.random() >= 0.5) {
       var trainingStimuli = mozartTrainingStimuli.concat(haydnTrainingStimuli);
     } else {
@@ -226,6 +235,7 @@
       type: 'single-audio',
       prompt: function() {
         var trial = jsPsych.currentTrial();
+        console.log(trial.stimulus);
         return trainingPromptTemplate({
           composer: trial.composer,
           progress: trial.index * 10,
