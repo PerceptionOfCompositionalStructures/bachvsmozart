@@ -93,6 +93,21 @@
     </head>
     <body>
     </body>
+    <script src="https://www.gstatic.com/firebasejs/4.6.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.6.2/firebase-database.js"></script>
+    <script>
+      // Initialize Firebase
+      var config = {
+        apiKey: "AIzaSyBLs5t_IM7_5PWFTiPL9mKwVmN9xOmI_Dg",
+        authDomain: "haydnvsmozart.firebaseapp.com",
+        databaseURL: "https://haydnvsmozart.firebaseio.com",
+        projectId: "haydnvsmozart",
+        storageBucket: "haydnvsmozart.appspot.com",
+        messagingSenderId: "478764571989"
+      };
+      firebase.initializeApp(config);
+    </script>
+
     <script id="training-prompt-template" type="text/x-handlebars-template">
       <div style="background-color: {{color}}" class="center-content training-container">
         <h1>Training phase: {{composer}}</h1>
@@ -347,7 +362,18 @@
       // on_trial_start: trialStart,
       timeline: timeline,
       on_finish: function() {
-        jsPsych.data.displayData();
+        var displayElement = jsPsych.getDisplayElement();
+        var userId = jsPsych.randomization.randomID(10);
+        var experimentData = jsPsych.data.getData();
+        firebase.database().ref('responses/' + userId).set(experimentData).then(
+          function () {
+            $(displayElement).html("<div>Thank you so much! Your responses have been recorded. Goodbye.</div>");              
+          },
+          function() {
+            $(displayElement).html("<div>Oh no! There was an error saving your data. But nothing is lost: please copy the text below and send it to us by email.</div>");
+            jsPsych.data.displayData();            
+          }
+        );
       }
     });
 
