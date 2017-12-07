@@ -8,8 +8,76 @@
         <script src="jspsych/plugins/jspsych-survey-text.js"></script>
         <script src="jspsych/plugins/jspsych-single-stim.js"></script>
         <script src="jspsych/plugins/jspsych-single-audio.js" type="text/javascript"></script>
+        <script src="jspsych-single-audio-with-confidence.js" type="text/javascript"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.11/handlebars.min.js" type="text/javascript"></script>
         <link href="jspsych/css/jspsych.css" rel="stylesheet" type="text/css"></link>
+        <style type="text/css">
+          .composer {
+            margin: 20px 80px;
+            height: 230px;
+            background-color: blue;
+            border: solid transparent 5px;
+            border-radius: 7px;
+            color: black;
+            cursor: pointer;
+          }
+          
+          .composer.selected {
+            border: solid black 5px;
+            font-weight: bold;
+          }
+          .composer:hover {
+            background-color: white;
+          }
+          .composer.selected:hover {
+            /*background-color: red;*/
+          }
+          
+          .composer img {
+            border-radius: 7px;
+          }
+          
+          .test-container {
+            padding-top: 1px;
+            color: rgb(164, 177, 194);
+            border-radius: 10px;
+          }
+          
+          .progress-bar {
+            width:200px;
+            height:20px;
+            background-color: rgb(107, 107, 107);
+            margin: auto;
+            border-radius: 4px;
+          }
+          
+          .progress-bar-inner {
+             height: 100%;
+             background-color: rgb(47, 47, 47);
+             border-radius: 4px;
+          }
+          
+          .progress-counter {
+            margin-top: 5px;
+          }
+          
+          .Mozart {
+            background-color: #f18f01;
+          }
+          
+          .Haydn {
+             background-color: #048ba8;
+          }
+          
+          .Mozart.selected {
+            background-color: #ffba56;
+          }
+          
+          .Haydn.selected {
+            background-color: #00bce5;
+          }
+          
+        </style>
     </head>
     <body>
     </body>
@@ -26,29 +94,29 @@
     </script>
 
     <script id="test-prompt-template" type="text/x-handlebars-template">
-      <div style="background-color: #2e4057" class="center-content">
+      <div style="background-color: #2e4057" class="center-content test-container">
         <h1>Test phase</h1>
-        <div style="width:200px; height:30px; background-color:red; margin: auto">
-          <div style="width:{{progress}}%; height: 100%; background-color:blue"></div>
+        <div class="progress-bar">
+          <div style="width:{{progress}}%;" class="progress-bar-inner"></div>
         </div>
-        <p>{{index}} out of 40</p>
+        <p class="progress-counter">{{index}} out of 40</p>
         <p>Listen to this chord. Who do you think composed it? Choose below.</p>
         
-        <div class="left composer" style="width:50%" onclick="selectComposer(this)"><p>Mozart</p><img src="img/Mozart.jpg" style="width: 150px; height:150px"></div>
-        <div class="right composer" style="width:50%" onclick="selectComposer(this)"><p>Haydn</p><img src="img/Haydn.jpg" style="width: 150px; height:150px"></div>
+        <div class="left" style="width: 50%"><div class="composer Mozart" onclick="selectComposer(this)"><p>Mozart</p><img src="img/Mozart.jpg" style="width: 150px; height:150px"></div></div>
+        <div class="right" style="width: 50%"><div class="composer Haydn" onclick="selectComposer(this)"><p>Haydn</p><img src="img/Haydn.jpg" style="width: 150px; height:150px"></div></div>
         <span style="clear: left; display: block; "></span>
         <p>How confident are you of your answer?</p>
         <table style="margin: auto; width: 100%">
           <!-- <tr><td colspan="7"><span style="float:left">Not confident at all</span><span style="float:right">Very confident</span></td></tr> -->
           <tr>
             <td style="text-align:right">Not confident at all</td>
-            <td><input type="radio" name="confidence" onclick="updateUI()"></td>
-            <td><input type="radio" name="confidence" onclick="updateUI()"></td>
-            <td><input type="radio" name="confidence" onclick="updateUI()"></td>
-            <td><input type="radio" name="confidence" onclick="updateUI()"></td>
-            <td><input type="radio" name="confidence" onclick="updateUI()"></td>
-            <td><input type="radio" name="confidence" onclick="updateUI()"></td>
-            <td><input type="radio" name="confidence" onclick="updateUI()"></td>
+            <td><input type="radio" name="confidence" value="1" onclick="updateUI()"></td>
+            <td><input type="radio" name="confidence" value="2" onclick="updateUI()"></td>
+            <td><input type="radio" name="confidence" value="3" onclick="updateUI()"></td>
+            <td><input type="radio" name="confidence" value="4" onclick="updateUI()"></td>
+            <td><input type="radio" name="confidence" value="5" onclick="updateUI()"></td>
+            <td><input type="radio" name="confidence" value="6" onclick="updateUI()"></td>
+            <td><input type="radio" name="confidence" value="7" onclick="updateUI()"></td>
             <td style="text-align:left">Very confident</td>
           </tr>
           <tr>
@@ -63,19 +131,39 @@
             <td></td>
           </tr>
         </table>
-        <button id="next" disabled style="font-size:24px; margin-top: 20px; margin-bottom: 30px">Next</button>
+        <button id="next" onclick="nextTrial()" disabled style="font-size:24px; margin-top: 20px; margin-bottom: 30px">Next</button>
       </div>
     </script>
 
     <script>
     
     function updateUI() {
-      if ($("input:radio:checked").length != 0 && $(".composer.selected").length != 0) {
+      if (
+        $("input:radio:checked").length != 0 &&
+        $(".composer.selected").length != 0 &&
+        finishedPlaying) {
         $('#next').removeAttr('disabled');
       }
     }
     
+    function nextTrial() {
+      var currentTrial = jsPsych.currentTrial();
+      var chosenComposer = $('.composer.selected').text();
+      var correct = chosenComposer == currentTrial.composer;
+      var confidence = $('input:radio:checked').attr('value');
+      var trialResult = {
+        stimulus: currentTrial.stimulus,
+        response: chosenComposer,
+        confidence: confidence,
+        correct: correct
+      }
+      console.log(trialResult);
+      $('.jspsych-display-element').html('');
+      jsPsych.finishTrial(trialResult);
+    }
+    
     function selectComposer(el) {
+      $('.composer.selected').removeClass('selected');
       $(el).addClass('selected');
       updateUI();
     }
@@ -162,14 +250,22 @@
         index: i + 10
       });
     }
-    
+    var finishedPlaying = false;
+    var finishedPlayingTimeout;
     //var all_trials = jsPsych.randomization.repeat(test_stimuli, 1);
     // TODO: randomize order?
     var testPromptTemplate = Handlebars.compile(document.getElementById("test-prompt-template").innerHTML);
     var test_block = {
-      type: 'single-audio',
-      choices: ['H', 'M'],
+      type: 'single-audio-with-confidence',
+      //choices: ['H', 'M'],
       prompt: function() {
+        finishedPlaying = false;
+        finishedPlayingTimeout = setTimeout(function() {
+          finishedPlaying = true;
+          clearTimeout(finishedPlayingTimeout);
+          updateUI();
+        }, 8000);
+        
         var trial = jsPsych.currentTrial();
         return testPromptTemplate({
           progress: trial.index / 40 * 100,
@@ -178,16 +274,16 @@
       },
       timeline: test_stimuli,
       // timing_response: 1500,
-      on_finish: function(data){
-        var correct = false;
-        console.log(data.composer, data.key_press);
-        if(data.composer == 'Haydn' && data.key_press == 72) {
-          correct = true;
-        } else if(data.composer == 'Mozart' && data.key_press == 77) {
-          correct = true;
-        }
-        jsPsych.data.addDataToLastTrial({correct: correct});
-      }
+      // on_finish: function(data){
+      //   var correct = false;
+      //   console.log(data.composer, data.key_press);
+      //   if(data.composer == 'Haydn' && data.key_press == 72) {
+      //     correct = true;
+      //   } else if(data.composer == 'Mozart' && data.key_press == 77) {
+      //     correct = true;
+      //   }
+      //   jsPsych.data.addDataToLastTrial({correct: correct});
+      // }
     };
     
     var survey_trial = {
@@ -200,16 +296,16 @@
     // timeline.push(training_block);
     timeline.push(test_block);
     timeline.push(survey_trial);
-
-    function trialStart() {
-      console.log('start');
-      $('#next').click(function() {
-        console.log('click!!');
-      });
-    }
+    // 
+    // function trialStart() {
+    //   console.log('start');
+    //   $('#next').click(function() {
+    //     console.log('click!!');
+    //   });
+    // }
     
     jsPsych.init({
-      on_trial_start: trialStart,
+      // on_trial_start: trialStart,
       timeline: timeline,
       on_finish: function() {
         jsPsych.data.displayData();
