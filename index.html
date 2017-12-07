@@ -369,7 +369,10 @@
         var displayElement = jsPsych.getDisplayElement();
         var userId = jsPsych.randomization.randomID(10);
         var experimentData = jsPsych.data.getData();
-        firebase.database().ref('responses/' + userId).set(experimentData).then(
+        firebase.database().ref('responses/' + userId).set({
+          completed: Date.now(),
+          data: experimentData
+        }).then(
           function () {
             $(displayElement).html("<div>Thank you so much! Your responses have been recorded. Goodbye.</div>");              
           },
