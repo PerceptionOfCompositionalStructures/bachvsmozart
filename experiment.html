@@ -298,12 +298,18 @@
     
     var survey_trial = {
       type: 'survey-text',
-      questions: ["How old are you?", "Where were you born?"],
+      questions: [
+        "What helped you tell the difference between the Mozart and Haydn chords?",
+        "If you had more training, do you think it would help you perform better?",
+        "Before taking part in this experiment, how familiar were you with Haydn’s and Mozart’s symphonies?"
+      ],
+      rows: [3, 3, 3],
+      columns: [100, 100, 100]
     };
 
     timeline.push(welcome_block);
     timeline.push(instructions_block);
-    // timeline.push(training_block);
+    timeline.push(training_block);
     timeline.push(test_phase_introduction_block);
     timeline.push(test_block);
     timeline.push(survey_trial);
