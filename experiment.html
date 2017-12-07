@@ -164,6 +164,10 @@
 
     <script>
     
+    var debug = window.location.search.indexOf('debug') != -1;
+    var trainingStimuli = debug ? 2 : 10;
+    var testStimuli = debug ? 2 : 20;
+    
     function updateUI() {
       if (
         $("input:radio:checked").length != 0 &&
@@ -215,13 +219,13 @@
     };
 
     function addIndices(array) {
-      for (i = 0; i < array.length; i++) {
+      for (var i = 0; i < array.length; i++) {
         array[i].index = i + 1;
       }
     }
     
     var mozartTrainingStimuli = [];
-    for (i = 1; i <= 10; i++) {
+    for (var i = 1; i <= trainingStimuli; i++) {
       mozartTrainingStimuli.push({
         stimulus: 'stimuli/haydn/h_s_'+i+'.mp3',
         composer: 'Haydn',
@@ -230,7 +234,7 @@
     mozartTrainingStimuli = jsPsych.randomization.shuffle(mozartTrainingStimuli);
     addIndices(mozartTrainingStimuli);
     var haydnTrainingStimuli = [];
-    for (i = 1; i <= 10; i++) {
+    for (var i = 1; i <= trainingStimuli; i++) {
       haydnTrainingStimuli.push({
         stimulus: 'stimuli/mozart/m_s_'+i+'.mp3',
         composer: 'Mozart',
@@ -271,13 +275,13 @@
 
     
     var test_stimuli = [];
-    for (i = 11; i <= 30; i++) {
+    for (var i = 11; i <= 10 + testStimuli; i++) {
       test_stimuli.push({
         stimulus: 'stimuli/haydn/h_s_'+i+'.mp3',
         composer: 'Haydn',
       });
     }
-    for (i = 11; i <= 30; i++) {
+    for (var i = 11; i <= 10 + testStimuli; i++) {
       test_stimuli.push({
         stimulus: 'stimuli/mozart/m_s_'+i+'.mp3',
         composer: 'Mozart',
