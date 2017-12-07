@@ -32,23 +32,23 @@
           <div style="width:{{progress}}%; height: 100%; background-color:blue"></div>
         </div>
         <p>{{index}} out of 40</p>
-        <p>Listen to this chord. Who do you think composed it?</p>
+        <p>Listen to this chord. Who do you think composed it? Choose below.</p>
         
-        <div class="left"><p>Mozart</p><img src="img/Mozart.jpg"></div>
-        <div class="right"><p>Haydn</p><img src="img/Haydn.jpg"></div>
+        <div class="left composer" style="width:50%" onclick="selectComposer(this)"><p>Mozart</p><img src="img/Mozart.jpg" style="width: 150px; height:150px"></div>
+        <div class="right composer" style="width:50%" onclick="selectComposer(this)"><p>Haydn</p><img src="img/Haydn.jpg" style="width: 150px; height:150px"></div>
         <span style="clear: left; display: block; "></span>
         <p>How confident are you of your answer?</p>
         <table style="margin: auto; width: 100%">
           <!-- <tr><td colspan="7"><span style="float:left">Not confident at all</span><span style="float:right">Very confident</span></td></tr> -->
           <tr>
             <td style="text-align:right">Not confident at all</td>
-            <td><input type="radio" name="confidence"></td>
-            <td><input type="radio" name="confidence"></td>
-            <td><input type="radio" name="confidence"></td>
-            <td><input type="radio" name="confidence"></td>
-            <td><input type="radio" name="confidence"></td>
-            <td><input type="radio" name="confidence"></td>
-            <td><input type="radio" name="confidence"></td>
+            <td><input type="radio" name="confidence" onclick="updateUI()"></td>
+            <td><input type="radio" name="confidence" onclick="updateUI()"></td>
+            <td><input type="radio" name="confidence" onclick="updateUI()"></td>
+            <td><input type="radio" name="confidence" onclick="updateUI()"></td>
+            <td><input type="radio" name="confidence" onclick="updateUI()"></td>
+            <td><input type="radio" name="confidence" onclick="updateUI()"></td>
+            <td><input type="radio" name="confidence" onclick="updateUI()"></td>
             <td style="text-align:left">Very confident</td>
           </tr>
           <tr>
@@ -63,11 +63,23 @@
             <td></td>
           </tr>
         </table>
-        <button>Next</button>
+        <button id="next" disabled style="font-size:24px; margin-top: 20px; margin-bottom: 30px">Next</button>
       </div>
     </script>
 
     <script>
+    
+    function updateUI() {
+      if ($("input:radio:checked").length != 0 && $(".composer.selected").length != 0) {
+        $('#next').removeAttr('disabled');
+      }
+    }
+    
+    function selectComposer(el) {
+      $(el).addClass('selected');
+      updateUI();
+    }
+    
     var timeline = [];
     
     /* define welcome message block */
@@ -189,7 +201,15 @@
     timeline.push(test_block);
     timeline.push(survey_trial);
 
+    function trialStart() {
+      console.log('start');
+      $('#next').click(function() {
+        console.log('click!!');
+      });
+    }
+    
     jsPsych.init({
+      on_trial_start: trialStart,
       timeline: timeline,
       on_finish: function() {
         jsPsych.data.displayData();
