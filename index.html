@@ -25,8 +25,8 @@
           }
         
           .composer {
-            margin: 20px 80px;
-            height: 230px;
+            margin: 20px 120px;
+            height: 170px;
             background-color: blue;
             border: solid transparent 5px;
             border-radius: 7px;
@@ -47,6 +47,13 @@
           
           .composer img {
             border-radius: 7px;
+            width: 120px;
+            height: 120px;
+          }
+          
+          .composer p {
+            margin-top: 0;
+            margin-bottom: 2px;
           }
           
           .test-container {
@@ -89,6 +96,14 @@
             background-color: #00bce5;
           }
           
+          .instructions {
+            margin-bottom: 0;
+          }
+          
+          .confidence {
+            margin-top: 0;
+          }
+          
         </style>
     </head>
     <body>
@@ -127,12 +142,12 @@
           <div style="width:{{progress}}%;" class="progress-bar-inner"></div>
         </div>
         <p class="progress-counter">{{index}} out of 40</p>
-        <p>Listen to this chord. Who do you think composed it? Choose below.</p>
+        <p class="instructions">Listen to this chord. Who do you think composed it? Choose below.</p>
         
-        <div class="left" style="width: 50%"><div class="composer {{composer1}}" onclick="selectComposer(this)"><p>{{composer1}}</p><img src="img/{{composer1}}.jpg" style="width: 150px; height:150px"></div></div>
-        <div class="right" style="width: 50%"><div class="composer {{composer2}}" onclick="selectComposer(this)"><p>{{composer2}}</p><img src="img/{{composer2}}.jpg" style="width: 150px; height:150px"></div></div>
+        <div class="left" style="width: 50%"><div class="composer {{composer1}}" onclick="selectComposer(this)"><p>{{composer1}}</p><img src="img/{{composer1}}.jpg"></div></div>
+        <div class="right" style="width: 50%"><div class="composer {{composer2}}" onclick="selectComposer(this)"><p>{{composer2}}</p><img src="img/{{composer2}}.jpg"></div></div>
         <span style="clear: left; display: block; "></span>
-        <p>How confident are you of your answer?</p>
+        <p class="confidence">How confident are you of your answer?</p>
         <table style="margin: auto; width: 100%">
           <!-- <tr><td colspan="7"><span style="float:left">Not confident at all</span><span style="float:right">Very confident</span></td></tr> -->
           <tr>
@@ -210,9 +225,9 @@
     var instructions_block = {
       type: "text",
       text:
-          "<p>In this experiment, you will hear final chords from Mozart and Haydn symphonies.</p>" +
-          "<p>First, you will go through a training phase where you will hear 10 chords by each composer.</p>" +
-          "<p>Subsequently, you will hear 40 chords and will be asked to decide for each chord whether it was composed by Haydn or Mozart, based on the chord's orchestration style.</p>" +
+          "<p>In this experiment, you will listen to final chords from Mozart and Haydn symphonies.</p>" +
+          "<p>First, you will go through a training phase where you will listen to 10 chords by each composer.</p>" +
+          "<p>Subsequently, you will listen to 40 chords and will be asked to decide for each chord whether it was composed by Haydn or Mozart, based on the chord's orchestration style.</p>" +
           "<p>Make sure to use <strong>headphones</strong> for this experiment so that you can hear the whole orchestral range.</p>" +
           "<p>Press any key to begin.</p>",
       timing_post_trial: 2000
